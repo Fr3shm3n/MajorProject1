@@ -3,19 +3,28 @@
 #include <unistd.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include<sys/wait.h>
 
 int main(int argc, char **argv)
 {
-	int i = 0, x, counter = 0, arg;
+	pid_t pid;
+	int status;
+	
+	int i, x, temp, counter, arg;
 	long size;
 	char input[512];
 	char *buffer, *cwd;
-	char **command, **cmds, **args;
+	char *command, **cmds, *argument, **args;
+	char *endCmnd;
 	
 	if(argc == 1)
 	{
 		while(1)
 		{
+			i = 0;
+			x = 0;
+			temp = 0;
 			counter = 0;
 			printf("> ");
 			fgets(input, 512, stdin);
@@ -29,16 +38,14 @@ int main(int argc, char **argv)
 				}
 			}
 			cmds = malloc(counter*sizeof(char*));
-			command[i] = strtok(input, ";");
-			while(command[i] != NULL)
+			command = strtok_r(input, ";", &endCmnd);
+			while(command != NULL)
 			{
-				cmds[i] = malloc(strlen(command[i])*sizeof(char));
-				strcpy(cmds[i], command[i]);
+				pid = fork()
+				char *endArg;
+				cmds[i] = malloc(strlen(command)*sizeof(char));
+				strcpy(cmds[i], command);
 				i++;
-				command[i] = strtok(NULL, ";");
-			}
-			for(i = 0; i < counter; i++)
-			{
 				arg = 1;
 				for(x = 0; x < strlen(cmds[i]) + 1; x++)
 				{
@@ -50,44 +57,53 @@ int main(int argc, char **argv)
 							arg++;
 					}
 				}
-			}
-			/*args = malloc(arg*sizeof(char*));
-			i = 0;
-			for(x = 0; x < arg; x++)
-			{
-				command[i] = strtok(cmds[x], " ");
-				while(command[i] != NULL)
+					args = malloc(arg*sizeof(char*));
+					argument = strtok_r(command, " ", &endArg);
+					while(argument != NULL)
+					{
+						args[temp] = malloc(strlen(argument)*sizeof(char));
+						strcpy(args[temp], argument);
+						temp++;
+						argument = strtok_r(NULL, " ", &endArg);
+					}
+				/*if(pid == 0)
 				{
-					command[i] = malloc(strlen(cmds[x])*sizeof(char));
-					strcpy(args[i], command[i]);
-					i++;
-					command[i] = strtok(NULL, " ");
+					for(i = 0; i < counter; i++)
+					{
+						if(strcmp(cmds[i], "pwd") == 0)
+						{
+							cwd = getcwd(buffer, 0);
+							printf("%s", cwd);
+						}
+						else if(strcmp(cmds[i], "cd") == 0)
+						{
+							chdir(getenv("HOME"));
+						}
+						else if(strcmp(cmds[i], "cd") > 0)
+						{
+							chdir(args[1]);
+						}
+						else
+						{
+							execvp(args[0], args);
+						}
+					}
 				}
-				printf("%s", args[x]);
-			}*/
-			/*for(x = 0; x < counter; x++)
-			{
-				printf("%s\n", cmds[x]);
-				if(strcmp(cmds[x], "exit") == 0)
+				else if(pid > 0)
 				{
-					exit(0);
+					if(strcmp(cmds[i], "exit") == 0)
+					{
+						wait(0);
+						exit(0);
+					}
 				}
-				else if(strcmp(cmds[x], "pwd") == 0)
-				{
-					cwd = getcwd(buffer, 0);
-					printf("%s", cwd);
-				}
-				else if(strcmp(cmds[x], "cd") == 0)
-				{
-					chdir(getenv("HOME"));
-				}
-				else if(strcmp(cmds[x], "cd") > 0)
-				{}
 				else
-				{}
-				//	execvp(
-					
-			}*/
+				{
+					perror("Fork");
+					exit(1);
+				}*/
+				command = strtok_r(NULL, ";", &endCmnd);
+			}
 		}
 	}
 	else if(argc > 1)
